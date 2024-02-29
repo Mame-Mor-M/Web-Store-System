@@ -9,7 +9,7 @@
 
 
 
-class Products {
+class Products { // Format of any product sold by the store
 private:
 	std::string itemName;
 	float itemPrice;
@@ -35,8 +35,13 @@ public:
 		return itemPrice;
 	}
 
+	
 	int getItemStock() const {
 		return itemStock;
+	}
+
+	void setItemStock(int stock) {
+		this->itemStock = stock;
 	}
 
 };
@@ -48,14 +53,23 @@ const int maxCartCapacity = 50;
 Products wishlist[maxWishListCapacity];
 Products cart[maxCartCapacity];
 
+Products productArray[] = { // Purchaseable Items
+		Products("4K 65\"\ Sony TV", 1000.99, 100),
+		Products("4K 45\"\ Sony TV", 500.99, 150),
+		Products("Pen", 1.39, 2000),
+		Products("Playstation 5", 659.99, 40)
+
+};
+
 
 void AddWishlist(Products productArray[], const std::string prodName, int arraySize) {
-
+	bool isProduct = false;
 	for (int i = 0; i < maxWishListCapacity; i++) {
 		if (wishlist[i].getItemName() == "") { // Check if the current index is empty
 			for (int j = 0; j < arraySize / sizeof(productArray[0]); j++) { // Divide total size of array bit size of a single element to get the # of elements in the array. sizeof operator gives you bit size
 
 				if (prodName == productArray[j].getItemName()) { // Look for the product matching the user's inputted name
+					isProduct = true;
 					wishlist[i] = productArray[j]; // Add the product to the users wishlist
 				}
 			}
@@ -64,10 +78,40 @@ void AddWishlist(Products productArray[], const std::string prodName, int arrayS
 		}
 
 	}
+	if (!isProduct) {
+		std::cout << "\n---| " << prodName << " |---is not sold at this store...\n\n";
+		return;
+	}
+	else {
+		std::cout << "\n---| " << prodName << " |--- was added to your wishlist...\n\n";
+	}
+}
 
-	
-	
-	
+void AddToCart(Products productArray[], const std::string prodName, int arraySize) {
+	bool isProduct = false;
+	for (int i = 0; i < maxCartCapacity; i++) {
+		if (cart[i].getItemName() == "") { // Check if the current index is empty
+			for (int j = 0; j < arraySize / sizeof(productArray[0]); j++) { // Divide total size of array bit size of a single element to get the # of elements in the array. sizeof operator gives you bit size
+
+				if (prodName == productArray[j].getItemName()) { // Look for the product matching the user's inputted name
+					isProduct = true;
+					productArray[j].setItemStock(productArray[j].getItemStock() - 1); // Reduce stock when adding item to cart
+					
+					cart[i] = productArray[j]; // Add the product to the users cart
+				}
+			}
+
+			break;
+		}
+
+	}
+	if (!isProduct) {
+		std::cout << "\n---| " << prodName << " |---is not sold at this store...\n\n";
+		return;
+	}
+	else {
+		std::cout << "\n---| " << prodName << " |--- was added to your wishlist...\n\n";
+	}
 }
 bool Quit() {
 	char currentMenu;
@@ -90,6 +134,7 @@ bool Quit() {
 	
 }
 void CheckWishlist(Products wishlist[], int arraySize) {
+	std::cout << "\n----- Items in wishlist -----\n";
 	for (int i = 0; i < arraySize / sizeof(wishlist[0]); i++) {
 		if (wishlist[i].getItemName() != "") {
 			std::cout << wishlist[i].getItemName() << " ---- $" << wishlist[i].getItemPrice() << "\n";
@@ -98,23 +143,37 @@ void CheckWishlist(Products wishlist[], int arraySize) {
 			break;
 		}
 	}
+	std::cout << "-----------------------------\n\n";
 	return;
 }
+
+void CheckCart(Products cart[], int arraySize) {
+	std::cout << "\n----- Items in cart -----\n";
+	float totalCost = 0;
+	for (int i = 0; i < arraySize / sizeof(cart[0]); i++) {
+		if (cart[i].getItemName() != "") {
+			std::cout << cart[i].getItemName() << " ---- $" << cart[i].getItemPrice() << "\n";
+		}
+		else {
+			break;
+		}
+		totalCost += cart[i].getItemPrice();
+		
+	}
+	std::cout << "Total cost: $" << totalCost << "\n";
+	std::cout << "-------------------------\n\n";
+	return;
+}
+
 void Browse(bool browsing) {
 	
 
 	while (browsing == true) {
-		Products productArray[] = {
-		Products("4K 65\"\ Sony TV", 1000.99, 100),
-		Products("4K 45\"\ Sony TV", 500.99, 150),
-		Products("Pen", 1.39, 2000),
-		Products("Playstation 5", 659.99, 40)
-
-		};
+		
 
 		for (int i = 0; i < sizeof(productArray) / sizeof(productArray[0]); i++) { // Divide total size of array bit size of a single element to get the # of elements in the array. sizeof operator gives you bit size
 
-			std::cout << i + 1 << ". " << productArray[i].getItemName() << " ---- $" << productArray[i].getItemPrice() << "\n";
+			std::cout << i + 1 << ". " << productArray[i].getItemName() << " ---- $" << productArray[i].getItemPrice() << " ---- Quantity: " << productArray[i].getItemStock() << "\n";
 
 		}
 		
@@ -159,17 +218,22 @@ void Browse(bool browsing) {
 			AddWishlist(productArray, prodName, sizeof(productArray));
 		}
 
+		else if (prodTarget == "cart") {
+			AddToCart(productArray, prodName, sizeof(productArray));
+		}
 
-		
+		else {
+			std::cout << "Invalid Entry...\n";
+			continue;
+		}
+
 
 	}
 
 	return;
 }
 
-void CheckCart() {
 
-}
 
 
 int main()
@@ -193,6 +257,10 @@ int main()
 
 		else if (userActivity == "Wishlist") {
 			CheckWishlist(wishlist, sizeof(wishlist));
+		}
+
+		else if (userActivity == "Cart") {
+			CheckCart(cart, sizeof(cart));
 		}
 	}
 	
