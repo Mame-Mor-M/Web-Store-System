@@ -7,6 +7,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+
 class Product
 {
 private:
